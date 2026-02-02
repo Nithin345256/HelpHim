@@ -248,8 +248,7 @@ Before you begin, ensure you have the following installed:
 
 ## 📁 Project Structure
 
-```
-issuebridge/
+HelpHim/
 │
 ├── backend/
 │   ├── config/
@@ -286,15 +285,15 @@ issuebridge/
 │   ├── src/
 │   │   ├── pages/
 │   │   │   ├── FrontPage.jsx        # Public landing page
+│   │   │   ├── FrontPage.css        # FrontPage styles
 │   │   │   ├── Login.jsx            # Login form
+│   │   │   ├── Login.css            # Login styles
 │   │   │   ├── Register.jsx         # Registration form
+│   │   │   ├── Register.css         # Registration styles
 │   │   │   ├── UserDashboard.jsx    # User dashboard
-│   │   │   └── OfficerDashboard.jsx # Officer dashboard
-│   │   │
-│   │   ├── styles/
-│   │   │   ├── FrontPage.css
-│   │   │   ├── UserDashboard.css
-│   │   │   └── OfficerDashboard.css
+│   │   │   ├── UserDashboard.css    # User dashboard styles
+│   │   │   ├── OfficerDashboard.jsx # Officer dashboard
+│   │   │   └── OfficerDashboard.css # Officer dashboard styles
 │   │   │
 │   │   ├── App.js                   # Main app component
 │   │   ├── index.js                 # Entry point

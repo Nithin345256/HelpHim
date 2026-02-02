@@ -285,7 +285,7 @@ issuebridge/
 │   │   └── favicon.ico
 │   │
 │   ├── src/
-│   │   ├── components/
+│   │   ├── pages/
 │   │   │   ├── FrontPage.jsx        # Public landing page
 │   │   │   ├── Login.jsx            # Login form
 │   │   │   ├── Register.jsx         # Registration form

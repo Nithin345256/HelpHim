@@ -22,7 +22,6 @@ A full-stack MERN application for reporting, tracking, and resolving community i
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## 🎯 Overview
 

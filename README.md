@@ -173,8 +173,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/issuebridge.git
-   cd issuebridge
+   git clone https://github.com/Nithin345256/HelpHim.git
+   cd HelpHim
    ```
 
 2. **Install backend dependencies**
@@ -808,37 +808,3 @@ Contributions are welcome! Please follow these steps:
 - Update documentation for new features
 - Write unit tests for new functionality
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Authors
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
-
-## 🙏 Acknowledgments
-
-- [OpenStreetMap](https://www.openstreetmap.org/) for map tiles
-- [Leaflet](https://leafletjs.com/) for mapping library
-- [Nominatim](https://nominatim.org/) for geocoding services
-- [MongoDB](https://www.mongodb.com/) for database platform
-- React and Node.js communities
-
-## 📞 Support
-
-For support, email support@issuebridge.com or create an issue in the GitHub repository.
-
-## 🔗 Links
-
-- **Live Demo**: [https://issuebridge.vercel.app](https://issuebridge.vercel.app)
-- **API Documentation**: [https://api.issuebridge.com/docs](https://api.issuebridge.com/docs)
-- **Project Board**: [GitHub Projects](https://github.com/yourusername/issuebridge/projects)
-
----
-
-**⭐ If you find this project helpful, please consider giving it a star!**
-
-*Built with ❤️ using MERN Stack*

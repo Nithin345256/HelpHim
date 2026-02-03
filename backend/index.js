@@ -16,8 +16,9 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 app.use(express.json());
-app.use(cors());
-
+app.use(cors({
+  origin: "https://helphim.netlify.app"
+}))
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

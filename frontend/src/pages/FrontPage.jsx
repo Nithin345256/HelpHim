@@ -7,21 +7,60 @@ const FrontPage = () => {
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [actionLoading, setActionLoading] = useState({});
+  const [sessionId, setSessionId] = useState(null);
 
+  // Generate or retrieve a session ID for anonymous users
+  useEffect(() => {
+    let sid = localStorage.getItem('sessionId');
+    if (!sid) {
+      sid = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('sessionId', sid);
+    }
+    setSessionId(sid);
+  }, []);
+
+  // Fetch issues and their comments
   useEffect(() => {
     const fetchIssues = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/issues/public');
+        const response = await fetch('https://helphim-1.onrender.com/api/issues/public', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (!response.ok) {
-          throw new Error('Failed to fetch issues');
+          const text = await response.text();
+          try {
+            const data = JSON.parse(text);
+            throw new Error(data.message || `Failed to fetch issues: ${response.statusText}`);
+          } catch {
+            throw new Error(`Invalid response format: ${response.statusText}`);
+          }
         }
         const data = await response.json();
         if (!Array.isArray(data)) {
-          throw new Error('Invalid data format');
+          throw new Error('Invalid data format: Expected an array');
         }
-        setIssues(data);
+        const issuesWithComments = await Promise.all(
+          data.map(async (issue) => {
+            const commentsResponse = await fetch(`https://helphim-1.onrender.com/api/issues/${issue._id}/comments`, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!commentsResponse.ok) {
+              console.warn(`Failed to fetch comments for issue ${issue._id}: ${commentsResponse.statusText}`);
+              return { ...issue, comments: [] };
+            }
+            const commentsData = await commentsResponse.json();
+            return { ...issue, comments: commentsData || [], likes: Array.isArray(issue.likes) ? issue.likes : [] };
+          })
+        );
+        setIssues(issuesWithComments);
       } catch (err) {
-        setError('Failed to load issues. Please try again later.');
+        setError(`Failed to load issues: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -29,10 +68,90 @@ const FrontPage = () => {
     fetchIssues();
   }, []);
 
+  // Handle like/unlike
+  const handleLike = async (issueId) => {
+    setActionLoading((prev) => ({ ...prev, [issueId]: { ...prev[issueId], like: true } }));
+    try {
+      const response = await fetch(`https://helphim-1.onrender.com/api/issues/${issueId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Id': sessionId,
+        },
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        try {
+          const data = JSON.parse(text);
+          throw new Error(data.message || `Failed to like issue: ${response.statusText}`);
+        } catch {
+          throw new Error(`Invalid response format: ${response.statusText}`);
+        }
+      }
+      const data = await response.json();
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === issueId ? { ...issue, likes: Array.isArray(data.likes) ? data.likes : [] } : issue
+        )
+      );
+    } catch (err) {
+      setError(`Failed to like issue: ${err.message}`);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [issueId]: { ...prev[issueId], like: false } }));
+    }
+  };
+
+  // Handle comment submission
+  const handleCommentSubmit = async (issueId) => {
+    const commentText = commentInputs[issueId]?.trim();
+    if (!commentText) {
+      setError('Comment cannot be empty.');
+      return;
+    }
+    setActionLoading((prev) => ({ ...prev, [issueId]: { ...prev[issueId], comment: true } }));
+    try {
+      const response = await fetch(`https://helphim-1.onrender.com/api/issues/${issueId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Id': sessionId,
+        },
+        body: JSON.stringify({ content: commentText }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        try {
+          const data = JSON.parse(text);
+          throw new Error(data.message || `Failed to add comment: ${response.statusText}`);
+        } catch {
+          throw new Error(`Invalid response format: ${response.statusText}`);
+        }
+      }
+      const data = await response.json();
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue._id === issueId
+            ? { ...issue, comments: [...issue.comments, data] }
+            : issue
+        )
+      );
+      setCommentInputs((prev) => ({ ...prev, [issueId]: '' }));
+    } catch (err) {
+      setError(`Failed to add comment: ${err.message}`);
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [issueId]: { ...prev[issueId], comment: false } }));
+    }
+  };
+
+  // Handle comment input change
+  const handleCommentChange = (issueId, value) => {
+    setCommentInputs((prev) => ({ ...prev, [issueId]: value }));
+  };
+
   return (
     <div className="front-page">
       <nav className="front-nav">
-        <div className="nav-logo">HelpHim</div>
+        <div className="nav-logo">IssueBridge</div>
         <div className="nav-buttons">
           <button onClick={() => navigate('/login')} className="login-btn">Login</button>
           <button onClick={() => navigate('/register')} className="register-btn">Register</button>
@@ -41,7 +160,7 @@ const FrontPage = () => {
 
       <main className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to HelpHim</h1>
+          <h1>Welcome to IssueBridge</h1>
           <p className="hero-subtitle">Your platform for community support and assistance</p>
           <div className="hero-description">
             <p>Connect with your community, get help when you need it, and make a difference in others' lives.</p>
@@ -74,7 +193,6 @@ const FrontPage = () => {
         </div>
       </section>
 
-      {/* Issues List Section */}
       <section className="issues-section">
         <h2 className="issues-title">Reported Issues</h2>
         {error && <p className="error-message">{error}</p>}
@@ -84,17 +202,70 @@ const FrontPage = () => {
           <div className="issues-grid">
             {Array.isArray(issues) && issues.length > 0 ? (
               issues.map((issue) => (
-                <div key={issue._id} className="issue-card">
-                  <img
-                    src={issue.photo ? `http://localhost:4000${issue.photo}` : '/placeholder-image.png'}
-                    alt={issue.title}
-                    className="issue-image"
-                    onError={e => { e.target.onerror = null; e.target.src = '/placeholder-image.png'; }}
-                  />
-                  <h3 className="issue-title">{issue.title}</h3>
-                  <p className="issue-description">{issue.description}</p>
-                  <p className="issue-specialization">{issue.specialization}</p>
-                  <span className="issue-status">{issue.status}</span>
+                <div key={issue._id} className="issue-row">
+                  <div className="issue-image-container">
+                    <img
+                      src={issue.photo ? `https://helphim-1.onrender.com${issue.photo}` : '/placeholder-image.png'}
+                      alt={issue.title}
+                      className="issue-image"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/placeholder-image.png';
+                      }}
+                    />
+                  </div>
+                  <div className="issue-content">
+                    <h3 className="issue-title">{issue.title}</h3>
+                    <p className="issue-description">{issue.description}</p>
+                    <div className="issue-meta">
+                      <span className="issue-specialization">{issue.specialization}</span>
+                      <span className="issue-status">{issue.status}</span>
+                    </div>
+                    <div className="issue-actions">
+                      <button
+                        className={`like-btn ${Array.isArray(issue.likes) && issue.likes.includes(sessionId) ? 'liked' : ''}`}
+                        onClick={() => handleLike(issue._id)}
+                        disabled={actionLoading[issue._id]?.like}
+                      >
+                        <span className="like-icon">❤️</span>
+                        {Array.isArray(issue.likes) && issue.likes.includes(sessionId) ? 'Unlike' : 'Like'} ({Array.isArray(issue.likes) ? issue.likes.length : 0})
+                      </button>
+                    </div>
+                    <div className="comments-section">
+                      <h4>Comments</h4>
+                      {issue.comments.length > 0 ? (
+                        <ul className="comments-list">
+                          {issue.comments.map((comment) => (
+                            <li key={comment._id} className="comment-item">
+                              <p>
+                                <strong>{comment.author?.username || 'Anonymous'}</strong>: {comment.content}
+                              </p>
+                              <span className="comment-date">
+                                {new Date(comment.createdAt).toLocaleString()}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="no-comments">No comments yet.</p>
+                      )}
+                      <div className="comment-input">
+                        <textarea
+                          value={commentInputs[issue._id] || ''}
+                          onChange={(e) => handleCommentChange(issue._id, e.target.value)}
+                          placeholder="Add a comment..."
+                          disabled={actionLoading[issue._id]?.comment}
+                        />
+                        <button
+                          onClick={() => handleCommentSubmit(issue._id)}
+                          disabled={actionLoading[issue._id]?.comment}
+                          className="comment-submit-btn"
+                        >
+                          Post Comment
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))
             ) : (
@@ -128,4 +299,4 @@ const FrontPage = () => {
   );
 };
 
-export default FrontPage; 
+export default FrontPage;

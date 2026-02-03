@@ -2,11 +2,11 @@ import express from 'express';
 import { protect } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/uploadMiddleware.js';
 import validateIssue from '../middlewares/validateIssue.js';
-import { 
-  createIssue, 
-  editIssue, 
-  deleteIssue, 
-  getAllIssues, 
+import {
+  createIssue,
+  editIssue,
+  deleteIssue,
+  getAllIssues,
   getUserIssues,
   likeIssue,
   addComment,
@@ -17,18 +17,20 @@ import {
 
 const route = express.Router();
 
-route.post('/', protect, upload, validateIssue, createIssue);
+// Public routes (no authentication required)
 route.get('/public', getPublicIssues);
+route.post('/:id/like', likeIssue);
+route.post('/:id/comment', addComment);
+route.get('/:id/comments', getComments);
+
+// Protected routes (authentication required)
+route.post('/', protect, upload, validateIssue, createIssue);
 route.get("/user", protect, getUserIssues);
 route.get('/', protect, getAllIssues);
 
-// Like and Comment routes
-route.post('/:id/like', protect, likeIssue);
-route.post('/:id/comment', protect, addComment);
-route.get('/:id/comments', protect, getComments);
-
-route.get('/:id', protect, editIssue);
-route.delete('/:id', protect, deleteIssue);
-route.put('/:id', protect, updateIssue);
+// CRITICAL FIXES: Add protect middleware to these routes
+route.get('/:id', protect, editIssue);        // ← Added protect
+route.delete('/:id', protect, deleteIssue);   // ← Added protect  
+route.put('/:id', protect, updateIssue);      // ← Added protect - This was the main issue!
 
 export default route;

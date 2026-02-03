@@ -1,16 +1,16 @@
+// models/Issue.js
 import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    type: String,
+    required: true,
+  },
 }, { timestamps: true });
 
 const issueSchema = new mongoose.Schema({
@@ -33,12 +33,12 @@ const issueSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: true
+      required: true,
     },
     coordinates: {
       type: [Number],
-      required: true
-    }
+      required: true,
+    },
   },
   photo: {
     type: String,
@@ -51,13 +51,13 @@ const issueSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['Pending', 'In Progress', 'Resolved'],
-    default: 'Pending'
+    default: 'Pending',
   },
   likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    type: String,
+    default: [], // Ensure likes is always an array
   }],
-  comments: [commentSchema]
+  comments: [commentSchema],
 }, { timestamps: true });
 
 issueSchema.index({ location: '2dsphere' });

@@ -524,3 +524,238 @@ a:focus-visible {
   outline-offset: 2px;
   border-radius: 4px;
 }
+/* Add to the existing FrontPage.css */
+
+/* Issues Section - Single Row Layout */
+.issues-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.issue-row {
+  display: flex;
+  flex-direction: row;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.issue-row:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
+}
+
+.issue-image-container {
+  flex: 0 0 200px;
+}
+
+.issue-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.issue-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.issue-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.issue-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.like-btn.liked {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--success-500) 100%);
+  border-color: var(--primary-500);
+  color: #ffffff;
+}
+
+.like-btn:hover {
+  background: var(--gray-200);
+}
+
+.like-btn.liked:hover {
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--success-600) 100%);
+}
+
+.like-btn:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+}
+
+.like-icon {
+  font-size: 16px;
+}
+
+.comments-section {
+  margin-top: 16px;
+}
+
+.comments-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 12px;
+}
+
+.comments-list {
+  list-style: none;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.comment-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.comment-item p {
+  font-size: 14px;
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.comment-item p strong {
+  color: var(--gray-800);
+}
+
+.comment-date {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 4px;
+}
+
+.no-comments {
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.comment-input {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-input textarea {
+  flex: 1;
+  min-height: 60px;
+  padding: 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--gray-700);
+  background: var(--gray-50);
+  resize: vertical;
+}
+
+.comment-input textarea:focus {
+  border-color: var(--primary-500);
+  outline: none;
+}
+
+.comment-input textarea:disabled {
+  background: var(--gray-200);
+  cursor: not-allowed;
+}
+
+.comment-submit-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--success-500) 100%);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.comment-submit-btn:hover {
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--success-600) 100%);
+  transform: translateY(-2px);
+}
+
+.comment-submit-btn:disabled {
+  background: var(--gray-300);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .issue-row {
+    flex-direction: column;
+  }
+
+  .issue-image-container {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .issue-image {
+    height: 150px;
+  }
+
+  .comment-input {
+    flex-direction: column;
+  }
+
+  .comment-submit-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .issue-content {
+    gap: 8px;
+  }
+
+  .issue-title {
+    font-size: 18px;
+  }
+
+  .issue-description {
+    font-size: 14px;
+  }
+
+  .issue-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

@@ -20,7 +20,7 @@ const FrontPage = () => {
   useEffect(() => {
     const fetchIssues = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/issues/public');
+        const response = await axios.get('https://helphim.onrender.com/api/issues/public');
         setIssues(response.data);
       } catch (err) {
         setError('Failed to load issues. Please try again later.');
@@ -287,7 +287,7 @@ const FrontPage = () => {
             <div key={issue._id} className="issue-card">
               {issue.photo && (
                 <img
-                  src={`http://localhost:4000${issue.photo}`}
+                  src={`https://helphim.onrender.com${issue.photo}`}
                   alt={issue.title}
                   className="issue-image"
                 />

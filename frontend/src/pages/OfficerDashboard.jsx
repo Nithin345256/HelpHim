@@ -22,6 +22,7 @@ const OfficerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [issuePlaces, setIssuePlaces] = useState({});
+  const [updatingStatus, setUpdatingStatus] = useState({}); // Track which issues are being updated
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const OfficerDashboard = () => {
       
       try {
         // First get the profile to get specialization
-        const profileRes = await axios.get('http://localhost:4000/api/auth/me', {
+        const profileRes = await axios.get('https://helphim.onrender.com/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -48,8 +49,8 @@ const OfficerDashboard = () => {
         setProfile(profileRes.data);
         console.log('Profile data:', profileRes.data);
 
-        // Then get all issues
-        const issuesRes = await axios.get('http://localhost:4000/api/issues', {
+        // Then get all issues - let the backend filter them
+        const issuesRes = await axios.get('https://helphim.onrender.com/api/issues', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -57,15 +58,8 @@ const OfficerDashboard = () => {
           throw new Error('Failed to fetch issues');
         }
 
-        console.log('All issues:', issuesRes.data);
-
-        // Filter issues based on officer's specialization
-        const filteredIssues = issuesRes.data.filter(issue => 
-          issue.specialization === profileRes.data.specialization
-        );
-        console.log('Filtered issues:', filteredIssues);
-        
-        setIssues(filteredIssues);
+        console.log('Issues from backend:', issuesRes.data);
+        setIssues(issuesRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError(error.response?.data?.message || 'Failed to load data. Please try again.');
@@ -94,23 +88,70 @@ const OfficerDashboard = () => {
 
   const handleStatusChange = async (issueId, newStatus) => {
     const token = localStorage.getItem('token');
+    
+    // Prevent multiple simultaneous updates
+    if (updatingStatus[issueId]) {
+      return;
+    }
+
+    setUpdatingStatus(prev => ({ ...prev, [issueId]: true }));
+
     try {
-      await axios.put(
-        `http://localhost:4000/api/issues/${issueId}`,
+      console.log(`Updating issue ${issueId} status to ${newStatus}`);
+      
+      const response = await axios.put(
+        `https://helphim.onrender.com/api/issues/${issueId}`,
         { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
-      // Refresh issues after update
-      const issuesRes = await axios.get('http://localhost:4000/api/issues', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // Filter issues based on officer's specialization
-      const filteredIssues = issuesRes.data.filter(issue => 
-        issue.specialization === profile.specialization
+
+      console.log('Update response:', response.data);
+
+      // Update the local state immediately for better UX
+      setIssues(prevIssues => 
+        prevIssues.map(issue => 
+          issue._id === issueId 
+            ? { ...issue, status: newStatus }
+            : issue
+        )
       );
-      setIssues(filteredIssues);
+
+      // If status is "Resolved", remove from list (since officers only see non-resolved issues)
+      if (newStatus === 'Resolved') {
+        setIssues(prevIssues => prevIssues.filter(issue => issue._id !== issueId));
+      }
+
     } catch (err) {
-      alert('Failed to update status.');
+      console.error('Status update error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      
+      let errorMessage = 'Failed to update status.';
+      
+      if (err.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      } else if (err.response?.status === 403) {
+        errorMessage = 'You are not authorized to update this issue.';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Issue not found.';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      alert(errorMessage);
+      
+      // Refresh the page data to ensure consistency
+      window.location.reload();
+    } finally {
+      setUpdatingStatus(prev => ({ ...prev, [issueId]: false }));
     }
   };
 
@@ -150,6 +191,7 @@ const OfficerDashboard = () => {
         <div className="profile-info">
           <h2>Welcome, {profile.username}</h2>
           <p>Specialization: {profile.specialization}</p>
+          <p>Role: {profile.role}</p>
         </div>
       </div>
 
@@ -169,7 +211,7 @@ const OfficerDashboard = () => {
               </div>
               {issue.photo && (
                 <img
-                  src={`http://localhost:4000${issue.photo}`}
+                  src={`https://helphim.onrender.com${issue.photo}`}
                   alt={issue.title}
                   className="issue-photo"
                   style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }}
@@ -179,7 +221,6 @@ const OfficerDashboard = () => {
               <div className="issue-meta">
                 <span><b>Specialization:</b> {issue.specialization}</span><br/>
                 <span><b>Location:</b> {issuePlaces[issue._id] || 'N/A'}</span><br/>
-                <span><b>Posted by:</b> {issue.author?.username || issue.user || 'Unknown'}</span><br/>
                 <span><b>Date:</b> {new Date(issue.createdAt).toLocaleString()}</span><br/>
                 <span><b>Likes:</b> {issue.likes ? issue.likes.length : 0}</span><br/>
                 <span><b>Comments:</b> {issue.comments ? issue.comments.length : 0}</span>
@@ -189,11 +230,13 @@ const OfficerDashboard = () => {
                   value={issue.status}
                   onChange={(e) => handleStatusChange(issue._id, e.target.value)}
                   className="status-select"
+                  disabled={updatingStatus[issue._id]}
                 >
                   <option value="Pending">Pending</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Resolved">Resolved</option>
                 </select>
+                {updatingStatus[issue._id] && <span className="updating-indicator">Updating...</span>}
               </div>
             </div>
           ))}
@@ -203,4 +246,4 @@ const OfficerDashboard = () => {
   );
 };
 
-export default OfficerDashboard; 
+export default OfficerDashboard;

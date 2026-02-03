@@ -72,7 +72,7 @@ const UserDashboard = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/auth/me', {
+        const response = await axios.get('https://helphim.onrender.com/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(response.data);
@@ -84,7 +84,7 @@ const UserDashboard = () => {
 
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/issues/user', {
+        const response = await axios.get('https://helphim.onrender.com/api/issues/user', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setComplaints(response.data);
@@ -193,7 +193,7 @@ const UserDashboard = () => {
       setFormData({ title: '', description: '', specialization: '', location: null, photo: null });
       setShowForm(false);
       // Refresh complaints
-      const response = await axios.get('http://localhost:4000/api/issues/user', {
+      const response = await axios.get('https://helphim.onrender.com/api/issues/user', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setComplaints(response.data);
@@ -217,7 +217,7 @@ const UserDashboard = () => {
     <div className="dashboard-container">
       <nav className="dashboard-nav">
         <div className="nav-brand">
-          <h1>HelpHim</h1>
+          <h1>IssueBridge</h1>
         </div>
         <div className="nav-user">
           <div className="user-info">
@@ -314,7 +314,7 @@ const UserDashboard = () => {
                           </span>
                         </div>
                         {complaint.photo && (
-                          <img src={`http://localhost:4000${complaint.photo}`} alt={complaint.title} style={{width:'100%',maxHeight:'180px',objectFit:'cover',borderRadius:'8px',marginBottom:'0.5rem'}} />
+                          <img src={`https://helphim.onrender.com${complaint.photo}`} alt={complaint.title} style={{width:'100%',maxHeight:'180px',objectFit:'cover',borderRadius:'8px',marginBottom:'0.5rem'}} />
                         )}
                         <p className="complaint-description">{complaint.description}</p>
                         <div className="complaint-footer">
@@ -405,7 +405,7 @@ const UserDashboard = () => {
                         </span>
                       </div>
                       {complaint.photo && (
-                        <img src={`http://localhost:4000${complaint.photo}`} alt={complaint.title} style={{width:'100%',maxHeight:'180px',objectFit:'cover',borderRadius:'8px',marginBottom:'0.5rem'}} />
+                        <img src={`https://helphim.onrender.com${complaint.photo}`} alt={complaint.title} style={{width:'100%',maxHeight:'180px',objectFit:'cover',borderRadius:'8px',marginBottom:'0.5rem'}} />
                       )}
                       <p className="complaint-description">{complaint.description}</p>
                       <div className="complaint-footer">

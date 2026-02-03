@@ -56,7 +56,7 @@ const Register = () => {
       if (formData.role === 'officer') {
         payload.specialization = formData.specialization;
       }
-      const response = await axios.post('http://localhost:4000/api/auth/register', payload);
+      const response = await axios.post('https://helphim.onrender.com/api/auth/register', payload);
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.user.role);

@@ -236,121 +236,12 @@ Before you begin, ensure you have the following installed:
 ```bash
 # Server Configuration
 PORT=4000
-NODE_ENV=development
 
-# Database
-MONGODB_URI=mongodb://localhost:27017/issuebridge
 # MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/issuebridge?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/issuebridge?retryWrites=true&w=majority
 
 # Authentication
 JWT_SECRET=your_256_bit_secret_key_change_in_production
-JWT_EXPIRE=1d
-
-# File Upload
-MAX_FILE_SIZE=5242880  # 5MB in bytes
-ALLOWED_FILE_TYPES=image/jpeg,image/jpg,image/png
-
-# CORS
-CORS_ORIGIN=http://localhost:3000
-```
-
-### Frontend (.env)
-
-```bash
-# API Configuration
-REACT_APP_API_URL=http://localhost:4000/api
-REACT_APP_UPLOADS_URL=http://localhost:4000/uploads
-
-# Map Configuration
-REACT_APP_MAP_CENTER_LAT=12.9716
-REACT_APP_MAP_CENTER_LNG=77.5946
-REACT_APP_MAP_ZOOM=13
-```
-
-## 🚢 Deployment
-
-### Backend Deployment (Heroku)
-
-1. **Prepare for deployment**
-   ```bash
-   # Create Procfile
-   echo "web: node server.js" > Procfile
-   ```
-
-2. **Deploy to Heroku**
-   ```bash
-   heroku create issuebridge-api
-   heroku config:set MONGODB_URI="your_mongodb_atlas_uri"
-   heroku config:set JWT_SECRET="your_secret_key"
-   git push heroku main
-   ```
-
-### Frontend Deployment (Vercel/Netlify)
-
-1. **Build the app**
-   ```bash
-   cd frontend
-   npm run build
-   ```
-
-2. **Deploy to Vercel**
-   ```bash
-   vercel --prod
-   ```
-
-### Docker Deployment
-
-```dockerfile
-# Dockerfile
-FROM node:16-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-
-EXPOSE 4000
-
-CMD ["node", "server.js"]
-```
-
-```yaml
-# docker-compose.yml
-version: '3.8'
-
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "4000:4000"
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/issuebridge
-      - JWT_SECRET=${JWT_SECRET}
-    depends_on:
-      - mongo
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
-```
-
-## 🧪 Testing
 
 ### Backend Tests
 
